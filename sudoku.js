@@ -11,9 +11,12 @@
  * 6. Draw the grid and numbers on the canvas
  * 7. Enjoy the game!
  * 
- * Made by:
- * - GitHub: @FreddyFlamingo
+ * Made after reading: https://www.geeksforgeeks.org/sudoku-backtracking-7/
+ * 
+ * Author: @FreddyFlamingo
+ * 
  */
+
 
 // Get the canvas element
 const canvas = document.getElementById("SudokuCanvas");
@@ -38,9 +41,9 @@ function generateSudokuGrid() {
             grid[i][j] = 0;
         }
     }
-    solveSudoku(grid); // Solve the generated grid
+    solveSudoku(grid);
 
-    // Shuffle rows
+    // Shuffle rows within each block
     for (let i = 0; i < BLOCK_SIZE; i++) {
         const shuffleStart = i * BLOCK_SIZE;
         const shuffleEnd = shuffleStart + BLOCK_SIZE;
@@ -50,22 +53,17 @@ function generateSudokuGrid() {
     }
 
     // Transpose the grid to shuffle columns
-    const transposedGrid = grid[0].map((_, colIndex) => grid.map(row => row[colIndex]));
-
-    // Shuffle columns (same as shuffling rows and then transposing)
     for (let i = 0; i < BLOCK_SIZE; i++) {
-        const shuffleStart = i * BLOCK_SIZE;
-        const shuffleEnd = shuffleStart + BLOCK_SIZE;
-        const shuffledColumns = transposedGrid.slice(shuffleStart, shuffleEnd);
-        shuffledColumns.sort(() => Math.random() - 0.5);
-        transposedGrid.splice(shuffleStart, BLOCK_SIZE, ...shuffledColumns);
+        for (let j = i + 1; j < BLOCK_SIZE; j++) {
+            const temp = grid[i][j];
+            grid[i][j] = grid[j][i];
+            grid[j][i] = temp;
+        }
     }
 
     // Shuffle numbers (1-9)
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let i = 0; i < 9; i++) {
-        numbers.sort(() => Math.random() - 0.5);
-    }
+    shuffleArray(numbers);
 
     // Replace each number in the grid with the corresponding shuffled number
     for (let i = 0; i < GRID_SIZE; i++) {
@@ -75,6 +73,7 @@ function generateSudokuGrid() {
             }
         }
     }
+    
     return grid;
 }
 
@@ -118,6 +117,17 @@ function solveSudoku(grid) {
     return true;
 }
 
+// Function to shuffle an array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+    const n = array.length;
+    for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
 function drawSudokuGrid(grid, visibleNumbersCount) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "black";
@@ -145,7 +155,7 @@ function drawSudokuGrid(grid, visibleNumbersCount) {
     ctx.font = `${FONT_SIZE}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
+    
     let visibleNumbers = [];
     for (visibleNumbersCount; visibleNumbersCount > 0; visibleNumbersCount--) {
         let row = Math.floor(Math.random() * GRID_SIZE);
@@ -166,4 +176,4 @@ function drawSudokuGrid(grid, visibleNumbersCount) {
 const sudokuGrid = generateSudokuGrid();
 
 // Draw the Sudoku grid on the canvas
-drawSudokuGrid(sudokuGrid, 30);
+drawSudokuGrid(sudokuGrid, 31);
